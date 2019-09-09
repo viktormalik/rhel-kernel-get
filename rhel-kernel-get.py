@@ -131,6 +131,8 @@ def get_kernel_from_srpm(version, rpmname, url):
                    stderr=devnull)
 
     tarname = "linux-{}.tar.xz".format(version)
+    if not os.path.isfile(tarname):
+        tarname = "linux-{}.tar.bz2".format(version)
     return tarname
 
 
@@ -174,9 +176,15 @@ def get_kernel_tar_from_centos(version):
 def extract_tar(tarname):
     """Extract kernel sources from .tar.xz file."""
     print("Extracting")
-    check_call(["tar", "-xJf", tarname])
+    if tarname.endswith(".tar.xz"):
+        tar_opts = "-xJf"
+        dirname = tarname[:-7]
+    else:
+        # Filename ends with .tar.bz2
+        tar_opts = "-xjf"
+        dirname = tarname[:-8]
+    check_call(["tar", tar_opts, tarname])
     os.remove(tarname)
-    dirname = tarname[:-7]
     print("Done")
     return os.path.abspath(dirname)
 
