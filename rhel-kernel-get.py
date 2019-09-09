@@ -61,9 +61,12 @@ def get_config_file(version):
 
 def get_kabi_file(version, kabi_filename):
     """Get the name of the KABI whitelist archive."""
+    if os.path.isfile(kabi_filename):
+        return kabi_filename
     kabi_tarname_options = [
         "kernel-abi-whitelists-{}.tar.bz2".format(
             version[:-4]),
+        "kernel-abi-whitelists.tar.bz2"
     ]
     if "-" in version:
         kabi_tarname_options.append(
@@ -80,7 +83,20 @@ def get_kabi_file(version, kabi_filename):
 
             # Copy the desired whitelist
             kabi_file = os.path.join(cwd, kabi_filename)
-            os.rename(os.path.join("kabi-current", kabi_filename), kabi_file)
+
+            kabi_dir = "kabi-current"
+            if not os.path.isdir(kabi_dir):
+                # kabi-current directory does not exist, extract the current
+                # RHEL version from kernel.spec
+                os.chdir(cwd)
+                with open("kernel.spec", "r") as kernel_spec:
+                    for line in kernel_spec:
+                        if line.startswith("KABI_CURRENT="):
+                            kabi_dir = line[len("KABI_CURRENT="):].strip()
+                            break
+                os.chdir("kabi")
+
+            os.rename(os.path.join(kabi_dir, kabi_filename), kabi_file)
 
             os.chdir(cwd)
             # Clean temp dir
