@@ -170,7 +170,9 @@ centos_kernel_map = {
     "3.10.0-514.el7": "7.3.1611",
     "3.10.0-693.el7": "7.4.1708",
     "3.10.0-862.el7": "7.5.1804",
-    "3.10.0-957.el7": "7.6.1810"
+    "3.10.0-957.el7": "7.6.1810",
+    "4.18.0-80.el8": "8.0.1905",
+    "4.18.0-147.el8": "8.1.1911"
 }
 
 
@@ -181,9 +183,10 @@ def get_kernel_tar_from_centos(version):
     Sources are part of the SRPM package and need to be extracted out of it.
     :returns Name of the tar file containing the sources.
     """
-    url = "http://vault.centos.org/centos/"
+    url = "http://vault.centos.org/"
     url += centos_kernel_map[version]
-    url += "/os/Source/SPackages/"
+    url += "/BaseOS" if version.endswith(".el8") else "/os"
+    url += "/Source/SPackages/"
     rpmname = "kernel-{}.src.rpm".format(version)
     url += rpmname
     return get_kernel_from_srpm(version, rpmname, url)
