@@ -274,8 +274,8 @@ def configure_kernel():
         call_and_print(["make", "allmodconfig"])
     else:
         call_and_print(["make", "olddefconfig"])
-    call_and_print(["make", "prepare"])
-    call_and_print(["make", "modules_prepare"])
+    call_and_print(["make", "prepare", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"])
+    call_and_print(["make", "modules_prepare", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"])
 
 
 def autogen_time_headers():
@@ -285,7 +285,7 @@ def autogen_time_headers():
     """
     try:
         with open(os.devnull, 'w') as null:
-            check_call(["make", "-s", "kernel/time.o"],
+            check_call(["make", "-s", "kernel/time.o", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"],
                        stdout=null, stderr=null)
     except CalledProcessError:
         pass
