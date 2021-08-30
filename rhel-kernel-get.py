@@ -25,6 +25,7 @@ pbar = None
 # Custom build flags
 CFLAGS = "-Wno-error=attributes -Wno-error=restrict"
 EXTRA_CFLAGS = "-Wno-error=restrict -fno-pie -no-pie"
+LDFLAGS = "-no-pie"
 
 def show_progress(count, block_size, total_size):
     """Showing progress of downloading."""
@@ -286,9 +287,11 @@ def configure_kernel():
         call_and_print(["make", "olddefconfig"])
     call_and_print(["scripts/config", "--disable", "CONFIG_RETPOLINE"])
     call_and_print(["make", "prepare",
-                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS])
+                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS,
+                    "HOSTLDFLAGS=" + LDFLAGS])
     call_and_print(["make", "modules_prepare",
-                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS])
+                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS,
+                    "HOSTLDFLAGS=" + LDFLAGS])
 
 
 def autogen_time_headers():
