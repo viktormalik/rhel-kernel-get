@@ -22,6 +22,9 @@ import shutil
 # Progress bar for downloading
 pbar = None
 
+# Custom build flags
+CFLAGS = "-Wno-error=attributes -Wno-error=restrict"
+EXTRA_CFLAGS = "-Wno-error=restrict -fno-pie -no-pie"
 
 def show_progress(count, block_size, total_size):
     """Showing progress of downloading."""
@@ -281,8 +284,10 @@ def configure_kernel():
         call_and_print(["make", "allmodconfig"])
     else:
         call_and_print(["make", "olddefconfig"])
-    call_and_print(["make", "prepare", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"])
-    call_and_print(["make", "modules_prepare", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"])
+    call_and_print(["make", "prepare",
+                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS])
+    call_and_print(["make", "modules_prepare",
+                    "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS])
 
 
 def autogen_time_headers():
@@ -292,7 +297,8 @@ def autogen_time_headers():
     """
     try:
         with open(os.devnull, 'w') as null:
-            check_call(["make", "-s", "kernel/time.o", "EXTRA_CFLAGS=-Wno-error=restrict", "CFLAGS=-Wno-error=attributes -Wno-error=restrict"],
+            check_call(["make", "-s", "kernel/time.o",
+                        "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS],
                        stdout=null, stderr=null)
     except CalledProcessError:
         pass
