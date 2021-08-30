@@ -284,6 +284,7 @@ def configure_kernel():
         call_and_print(["make", "allmodconfig"])
     else:
         call_and_print(["make", "olddefconfig"])
+    call_and_print(["scripts/config", "--disable", "CONFIG_RETPOLINE"])
     call_and_print(["make", "prepare",
                     "EXTRA_CFLAGS=" + EXTRA_CFLAGS, "CFLAGS=" + CFLAGS])
     call_and_print(["make", "modules_prepare",
