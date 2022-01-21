@@ -63,18 +63,22 @@ def get_config_file(version):
     return None
 
 
-def get_kabi_file(version, kabi_filename):
+def get_kabi_file(version, kabi_filenames):
+    for filename in kabi_filenames:
+        if os.path.isfile(filename):
+            return filename
     """Get the name of the KABI whitelist archive."""
-    if os.path.isfile(kabi_filename):
-        return kabi_filename
     kabi_tarname_options = [
-        "kernel-abi-whitelists-{}.tar.bz2".format(
-            version[:-4]),
+        "kernel-abi-stablelists-{}.tar.bz2".format(version[:-4]),
+        "kernel-abi-whitelists-{}.tar.bz2".format(version[:-4]),
         "kernel-abi-whitelists.tar.bz2"
     ]
     if "-" in version:
         kabi_tarname_options.append(
             "kernel-abi-whitelists-{}.tar.bz2".format(
+                version.split("-")[1].split(".")[0]))
+        kabi_tarname_options.append(
+            "kernel-abi-stablelists-{}.tar.bz2".format(
                 version.split("-")[1].split(".")[0]))
     for kabi_tarname in kabi_tarname_options:
         if os.path.isfile(kabi_tarname):
@@ -86,8 +90,6 @@ def get_kabi_file(version, kabi_filename):
             check_call(["tar", "-xjf", kabi_tarname])
 
             # Copy the desired whitelist
-            kabi_file = os.path.join(cwd, kabi_filename)
-
             kabi_dir = "kabi-current"
             if not os.path.isdir(kabi_dir):
                 # kabi-current directory does not exist, extract the current
@@ -100,7 +102,12 @@ def get_kabi_file(version, kabi_filename):
                             break
                 os.chdir("kabi")
 
-            os.rename(os.path.join(kabi_dir, kabi_filename), kabi_file)
+            for filename in kabi_filenames:
+                file = os.path.join(kabi_dir, filename)
+                if (os.path.isfile(file)):
+                    kabi_file = os.path.join(cwd, filename)
+                    shutil.copyfile(file, kabi_file)
+                    break
 
             os.chdir(cwd)
             # Clean temp dir
@@ -346,10 +353,11 @@ os.chdir(tmp)
 
 # Extract KABI list
 if args.kabi:
-    kabi_filename = "kabi_whitelist_x86_64"
-    kabi_file = get_kabi_file(args.version, kabi_filename)
+    kabi_filenames = ["kabi_whitelist_x86_64", "kabi_stablelist_x86_64"]
+    kabi_file = get_kabi_file(args.version, kabi_filenames)
     if kabi_file:
-        os.rename(kabi_file, os.path.join(kernel_dir, kabi_filename))
+        os.rename(kabi_file, os.path.join(kernel_dir,
+                                          os.path.basename(kabi_file)))
 
 target = os.path.join(output_dir, os.path.basename(kernel_dir))
 if os.path.isdir(target):
