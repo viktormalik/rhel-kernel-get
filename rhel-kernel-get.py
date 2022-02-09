@@ -87,7 +87,7 @@ def get_kabi_file(version, kabi_filenames):
             os.mkdir("kabi")
             os.rename(kabi_tarname, "kabi/{}".format(kabi_tarname))
             os.chdir("kabi")
-            check_call(["tar", "-xjf", kabi_tarname])
+            check_call(["tar", "--no-same-owner", "-xjf", kabi_tarname])
 
             # Copy the desired whitelist
             kabi_dir = "kabi-current"
@@ -222,7 +222,7 @@ def extract_tar(tarname):
         # Filename ends with .tar.bz2
         tar_opts = "-xjf"
         dirname = tarname[:-8]
-    check_call(["tar", tar_opts, tarname])
+    check_call(["tar", "--no-same-owner", tar_opts, tarname])
     os.remove(tarname)
     print("Done")
     return os.path.abspath(dirname)
