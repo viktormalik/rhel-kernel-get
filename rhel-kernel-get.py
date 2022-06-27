@@ -23,8 +23,8 @@ import shutil
 pbar = None
 
 # Custom build flags
-CFLAGS = "-Wno-error=attributes -Wno-error=restrict"
-EXTRA_CFLAGS = "-Wno-error=restrict -fno-pie -no-pie"
+CFLAGS = "-w"
+EXTRA_CFLAGS = "-w -fno-pie -no-pie"
 LDFLAGS = "-no-pie"
 
 def show_progress(count, block_size, total_size):
