@@ -317,6 +317,27 @@ def autogen_time_headers():
         pass
 
 
+patch_commits = [
+    "dfbd199a7cfe"
+]
+
+
+def patch_kernel():
+    print("Applying patches")
+    patchdir = mkdtemp()
+    for patch in patch_commits:
+        patchfile = "{}.patch".format(patch)
+        patchpath = os.path.join(patchdir, patchfile)
+        url = "https://github.com/torvalds/linux/commit/" + patchfile
+        urlretrieve(url, patchpath)
+        try:
+            print("git apply {}".format(patch), end="")
+            check_call(["git", "apply", patchpath])
+            print(" (ok)")
+        except CalledProcessError:
+            print(" (fail)")
+
+
 # Parse CLI arguments
 ap = ArgumentParser(description="Get RHEL-based and upstream Linux kernel "
                                 "source")
@@ -341,12 +362,13 @@ os.chdir(tmp)
 # Download source
 kernel_dir = get_kernel_source(args.version)
 
-# Configure
+# Patch and configure
 config_file = get_config_file(args.version)
 if config_file:
     os.rename(config_file, os.path.join(kernel_dir, ".config"))
 os.chdir(kernel_dir)
 symlink_gcc_header()
+patch_kernel()
 configure_kernel()
 autogen_time_headers()
 os.chdir(tmp)
