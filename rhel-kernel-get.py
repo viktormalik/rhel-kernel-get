@@ -19,6 +19,42 @@ import os
 import re
 import shutil
 
+rhel_kernel_versions = {
+    "7.0": "3.10.0-123.el7",
+    "7.1": "3.10.0-229.el7",
+    "7.2": "3.10.0-327.el7",
+    "7.3": "3.10.0-514.el7",
+    "7.4": "3.10.0-693.el7",
+    "7.5": "3.10.0-862.el7",
+    "7.6": "3.10.0-957.el7",
+    "7.7": "3.10.0-1062.el7",
+    "7.8": "3.10.0-1127.el7",
+    "8.0": "4.18.0-80.el8",
+    "8.1": "4.18.0-147.el8",
+    "8.2": "4.18.0-193.el8",
+    "8.3": "4.18.0-240.el8",
+    "8.4": "4.18.0-305.el8",
+    "8.5": "4.18.0-348.el8"
+}
+
+centos_kernel_dirs = {
+    "3.10.0-123.el7": "7.0.1406",
+    "3.10.0-229.el7": "7.1.1503",
+    "3.10.0-327.el7": "7.2.1511",
+    "3.10.0-514.el7": "7.3.1611",
+    "3.10.0-693.el7": "7.4.1708",
+    "3.10.0-862.el7": "7.5.1804",
+    "3.10.0-957.el7": "7.6.1810",
+    "3.10.0-1062.el7": "7.7.1908",
+    "3.10.0-1127.el7": "7.8.2003",
+    "4.18.0-80.el8": "8.0.1905",
+    "4.18.0-147.el8": "8.1.1911",
+    "4.18.0-193.el8": "8.2.2004",
+    "4.18.0-240.el8": "8.3.2011",
+    "4.18.0-305.el8": "8.4.2105",
+    "4.18.0-348.el8": "8.5.2111"
+}
+
 # Progress bar for downloading
 pbar = None
 
@@ -26,6 +62,7 @@ pbar = None
 CFLAGS = "-w"
 EXTRA_CFLAGS = "-w -fno-pie -no-pie"
 LDFLAGS = "-no-pie"
+
 
 def show_progress(count, block_size, total_size):
     """Showing progress of downloading."""
@@ -177,34 +214,15 @@ def get_kernel_tar_from_brew(version):
     return get_kernel_from_srpm(version, rpmname, url)
 
 
-centos_kernel_map = {
-    "3.10.0-123.el7": "7.0.1406",
-    "3.10.0-229.el7": "7.1.1503",
-    "3.10.0-327.el7": "7.2.1511",
-    "3.10.0-514.el7": "7.3.1611",
-    "3.10.0-693.el7": "7.4.1708",
-    "3.10.0-862.el7": "7.5.1804",
-    "3.10.0-957.el7": "7.6.1810",
-    "3.10.0-1062.el7": "7.7.1908",
-    "3.10.0-1127.el7": "7.8.2003",
-    "4.18.0-80.el8": "8.0.1905",
-    "4.18.0-147.el8": "8.1.1911",
-    "4.18.0-193.el8": "8.2.2004",
-    "4.18.0-240.el8": "8.3.2011",
-    "4.18.0-305.el8": "8.4.2105",
-    "4.18.0-348.el8": "8.5.2111"
-}
-
-
 def get_kernel_tar_from_centos(version):
     """
     Download sources of the required kernel from the CentOS file server.
-    The correct address is determined using the centos_kernel_map.
+    The correct address is determined using the centos_kernel_dirs.
     Sources are part of the SRPM package and need to be extracted out of it.
     :returns Name of the tar file containing the sources.
     """
     url = "http://vault.centos.org/"
-    url += centos_kernel_map[version]
+    url += centos_kernel_dirs[version]
     url += "/BaseOS" if version.endswith(".el8") else "/os"
     url += "/Source/SPackages/"
     rpmname = "kernel-{}.src.rpm".format(version)
@@ -235,6 +253,7 @@ def get_kernel_source(version):
     # (e.g. 3.10.0-655.el7) it must be downloaded from Brew (StrictVersion will
     # raise exception on such version string). If Brew is unavailable,
     # download from CentOS.
+    version = rhel_kernel_versions.get(version, version)
     try:
         StrictVersion(version)
         tarname = get_kernel_tar_from_upstream(version)
