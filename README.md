@@ -14,8 +14,15 @@ Setting `--kabi` extracts the KABI whitelist (applicable to RHEL kernels only).
 
 ## Requirements
 
-* kernel build dependencies: gcc, make.
+* kernel build dependencies: gcc, make, bison, flex, libelf-dev (`elfutils-libelf-devel`),
+  bc, openssl (`openssl-devel`).
 * cpio
 * tar, xz, bzip2
 * Python 3 packages from `requirements.txt`
 
+Eg. on Fedora the requirements can be downloaded by following commands:
+
+```sh
+dnf install gcc make bison flex elfutils-libelf-devel bc openssl-devel cpio tar xz bzip2
+pip install -r requirements.txt
+```
