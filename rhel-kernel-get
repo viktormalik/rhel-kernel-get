@@ -34,7 +34,12 @@ rhel_kernel_versions = {
     "8.2": "4.18.0-193.el8",
     "8.3": "4.18.0-240.el8",
     "8.4": "4.18.0-305.el8",
-    "8.5": "4.18.0-348.el8"
+    "8.5": "4.18.0-348.el8",
+    "8.6": "4.18.0-372.9.1.el8",
+    "8.7": "4.18.0-425.3.1.el8",
+    "8.8": "4.18.0-477.10.1.el8_8",
+    "8.9": "4.18.0-513.5.1.el8_9",
+    "8.10": "4.18.0-553.el8_10",
 }
 
 centos_kernel_dirs = {
@@ -54,6 +59,16 @@ centos_kernel_dirs = {
     "4.18.0-305.el8": "8.4.2105",
     "4.18.0-348.el8": "8.5.2111"
 }
+
+# Versions available from
+# https://mirror.stream.centos.org/SIGs/8/kmods/source/kernels/
+centos_sig_versions = [
+    "4.18.0-372.9.1.el8",
+    "4.18.0-425.3.1.el8",
+    "4.18.0-477.10.1.el8_8",
+    "4.18.0-513.5.1.el8_9",
+    "4.18.0-553.el8_10"
+]
 
 # Progress bar for downloading
 pbar = None
@@ -117,6 +132,10 @@ def get_kabi_file(version, kabi_filenames):
         kabi_tarname_options.append(
             "kernel-abi-stablelists-{}.tar.bz2".format(
                 version.split("-")[1].split(".")[0]))
+        # Version in format X.X.X-XXX
+        kabi_tarname_options.append(
+            "kernel-abi-stablelists-{}.tar.bz2".format(
+                ".".join(version.split(".")[0:3])))
     for kabi_tarname in kabi_tarname_options:
         if os.path.isfile(kabi_tarname):
             cwd = os.getcwd()
@@ -197,6 +216,8 @@ def get_kernel_from_srpm(version, rpmname, url):
     tarname = "linux-{}.tar.xz".format(version)
     if not os.path.isfile(tarname):
         tarname = "linux-{}.tar.bz2".format(version)
+    if not os.path.isfile(tarname):
+        tarname = "linux-{}.tar.xz".format(version.split("_")[0])
     return tarname
 
 
@@ -217,14 +238,17 @@ def get_kernel_tar_from_brew(version):
 def get_kernel_tar_from_centos(version):
     """
     Download sources of the required kernel from the CentOS file server.
-    The correct address is determined using the centos_kernel_dirs.
     Sources are part of the SRPM package and need to be extracted out of it.
     :returns Name of the tar file containing the sources.
     """
-    url = "http://vault.centos.org/"
-    url += centos_kernel_dirs[version]
-    url += "/BaseOS" if version.endswith(".el8") else "/os"
-    url += "/Source/SPackages/"
+    if version in centos_sig_versions:
+        url = "https://mirror.stream.centos.org/SIGs/8/kmods/source/kernels/"
+    else:
+        # Determining the correct address using the centos_kernel_dirs.
+        url = "http://vault.centos.org/"
+        url += centos_kernel_dirs[version]
+        url += "/BaseOS" if version.endswith(".el8") else "/os"
+        url += "/Source/SPackages/"
     rpmname = "kernel-{}.src.rpm".format(version)
     url += rpmname
     return get_kernel_from_srpm(version, rpmname, url)
