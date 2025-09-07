@@ -3,7 +3,7 @@ import os
 
 setup(
     name = "rhel-kernel-get",
-    version = "0.1",
+    version = "0.2",
     description = "A tool for downloading and preparing RHEL kernels",
     author = "Viktor Malik",
     author_email = "vmalik@redhat.com",
